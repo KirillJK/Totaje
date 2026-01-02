@@ -3,10 +3,8 @@ import { TodoistApi } from '@doist/todoist-api-typescript';
 
 const router = Router();
 
-// Initialize Todoist API client
 const todoist = new TodoistApi(process.env.TODOIST_API_TOKEN || '');
 
-// Middleware to check authentication
 const requireAuth = (req: any, res: any, next: any) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -14,12 +12,10 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// Get all tasks
 router.get('/', requireAuth, async (req: any, res) => {
   try {
     const tasks = await todoist.getTasks();
 
-    // Transform Todoist tasks to our format
     const todos = tasks.results.map(task => ({
       id: task.id,
       text: task.content,
@@ -33,7 +29,6 @@ router.get('/', requireAuth, async (req: any, res) => {
   }
 });
 
-// Add new task
 router.post('/', requireAuth, async (req: any, res) => {
   const { text } = req.body;
 
@@ -59,23 +54,18 @@ router.post('/', requireAuth, async (req: any, res) => {
   }
 });
 
-// Toggle task completion
 router.patch('/:id', requireAuth, async (req: any, res) => {
   const taskId = req.params.id;
 
   try {
-    // Get current task to check if it's completed
     const task = await todoist.getTask(taskId);
 
     if (task.checked) {
-      // Reopen task
       await todoist.reopenTask(taskId);
     } else {
-      // Close task
       await todoist.closeTask(taskId);
     }
 
-    // Get updated task
     const updatedTask = await todoist.getTask(taskId);
 
     const todo = {
@@ -91,7 +81,6 @@ router.patch('/:id', requireAuth, async (req: any, res) => {
   }
 });
 
-// Delete task
 router.delete('/:id', requireAuth, async (req: any, res) => {
   const taskId = req.params.id;
 

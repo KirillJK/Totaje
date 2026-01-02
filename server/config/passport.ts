@@ -26,7 +26,6 @@ passport.use(
     (accessToken, refreshToken, profile, done) => {
       const email = profile.emails?.[0]?.value || '';
 
-      // Проверка разрешенного email
       const allowedEmail = 'kirill.j.kolesnikov@gmail.com';
       if (email !== allowedEmail) {
         return done(null, false, { message: 'Access denied. Only authorized email can login.' });

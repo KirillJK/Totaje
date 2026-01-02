@@ -3,16 +3,14 @@ import axios from 'axios';
 
 const router = Router();
 
-// Cache for weather data
 interface WeatherCache {
   data: any;
   timestamp: number;
 }
 
 let weatherCache: WeatherCache | null = null;
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+const CACHE_DURATION = 10 * 60 * 1000;
 
-// Middleware to check authentication
 const requireAuth = (req: any, res: any, next: any) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -20,7 +18,6 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// Get weather data
 router.get('/', requireAuth, async (req: any, res) => {
   try {
     const apiKey = process.env.WEATHER_API_KEY;
@@ -30,14 +27,12 @@ router.get('/', requireAuth, async (req: any, res) => {
       return res.status(500).json({ error: 'Weather API key not configured' });
     }
 
-    // Check if cached data is still valid
     const now = Date.now();
     if (weatherCache && (now - weatherCache.timestamp) < CACHE_DURATION) {
       console.log('Returning cached weather data');
       return res.json(weatherCache.data);
     }
 
-    // Fetch fresh data from API
     console.log('Fetching fresh weather data from API');
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
@@ -53,7 +48,6 @@ router.get('/', requireAuth, async (req: any, res) => {
       lastUpdated: new Date().toISOString(),
     };
 
-    // Update cache
     weatherCache = {
       data: weatherData,
       timestamp: now,

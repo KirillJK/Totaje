@@ -21,7 +21,6 @@ const Videos: React.FC = () => {
         withCredentials: true,
       });
       setVideos(response.data);
-      // Автоматически выбрать первое видео
       if (response.data.length > 0) {
         setCurrentVideo(response.data[0].path);
       }
@@ -45,7 +44,6 @@ const Videos: React.FC = () => {
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Videos</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        {/* Video Player */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
             {currentVideo ? (
@@ -76,7 +74,6 @@ const Videos: React.FC = () => {
           </div>
         </div>
 
-        {/* Video List */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Video List</h2>

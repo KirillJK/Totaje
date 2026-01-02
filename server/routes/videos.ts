@@ -4,7 +4,6 @@ import path from 'path';
 
 const router = Router();
 
-// Middleware to check authentication
 const requireAuth = (req: any, res: any, next: any) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -12,7 +11,6 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// Get list of videos
 router.get('/', requireAuth, async (req: any, res) => {
   try {
     const videoFolder = process.env.VIDEO_FOLDER;
@@ -21,15 +19,12 @@ router.get('/', requireAuth, async (req: any, res) => {
       return res.status(500).json({ error: 'Video folder not configured' });
     }
 
-    // Check if folder exists
     if (!fs.existsSync(videoFolder)) {
       return res.status(404).json({ error: 'Video folder not found' });
     }
 
-    // Read all files from the folder
     const files = fs.readdirSync(videoFolder);
 
-    // Filter only video files
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.m4v'];
     const videoFiles = files
       .filter(file => {
@@ -48,7 +43,6 @@ router.get('/', requireAuth, async (req: any, res) => {
   }
 });
 
-// Stream video file
 router.get('/stream/:filename', requireAuth, (req: any, res) => {
   try {
     const videoFolder = process.env.VIDEO_FOLDER;
@@ -60,13 +54,11 @@ router.get('/stream/:filename', requireAuth, (req: any, res) => {
 
     const videoPath = path.join(videoFolder, filename);
 
-    // Security check: ensure the path is within the video folder
     const normalizedPath = path.normalize(videoPath);
     if (!normalizedPath.startsWith(path.normalize(videoFolder))) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Check if file exists
     if (!fs.existsSync(videoPath)) {
       return res.status(404).json({ error: 'Video not found' });
     }

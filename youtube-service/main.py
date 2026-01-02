@@ -10,7 +10,6 @@ import uvicorn
 from database import Database
 from downloader import YouTubeDownloader
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -19,16 +18,14 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="YouTube Audio Download Service", version="1.0.0")
 
-# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database and downloader instances
 db: Optional[Database] = None
 downloader: Optional[YouTubeDownloader] = None
 download_task: Optional[asyncio.Task] = None
@@ -63,7 +60,6 @@ class QueueItem(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database connection and start download worker"""
     global db, downloader, download_task
 
     database_url = os.getenv("DATABASE_URL", "postgresql://jktota:jktota123@localhost:5432/jktota_db")
@@ -76,14 +72,12 @@ async def startup_event():
     logger.info(f"Initializing downloader with path: {download_path}")
     downloader = YouTubeDownloader(db, download_path)
 
-    # Start background download worker
     download_task = asyncio.create_task(downloader.process_queue())
     logger.info("Download worker started")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Clean up resources"""
     global db, download_task
 
     if download_task:
@@ -101,7 +95,6 @@ async def shutdown_event():
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
     return {
         "service": "YouTube Audio Download Service",
         "status": "running",
@@ -111,20 +104,16 @@ async def root():
 
 @app.post("/api/videos", response_model=VideoResponse)
 async def add_video(request: VideoRequest):
-    """Add a video to the download queue"""
     if not db or not downloader:
         raise HTTPException(status_code=503, detail="Service not initialized")
 
     try:
-        # Extract video ID from URL
         video_id = downloader.extract_video_id(str(request.url))
         if not video_id:
             raise HTTPException(status_code=400, detail="Invalid URL. Please provide a valid YouTube or Instagram URL")
 
-        # Check if video already exists
         existing = await db.get_video_by_video_id(video_id)
         if existing:
-            # If video exists, reset status to pending to re-queue it
             await db.update_status(existing['id'], 'pending', error_message=None)
             logger.info(f"Re-queued existing video: {video_id}")
             return VideoResponse(

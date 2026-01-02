@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 
-// Load environment variables FIRST, before any other imports
 dotenv.config();
 
 import express from 'express';
@@ -32,7 +31,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );

@@ -26,7 +26,6 @@ const Queue: React.FC = () => {
 
   useEffect(() => {
     fetchQueue();
-    // Poll for updates every 5 seconds
     const interval = setInterval(fetchQueue, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -117,7 +116,6 @@ const Queue: React.FC = () => {
     <div>
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Audio Download Queue</h1>
 
-      {/* Add Video Form */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Video</h2>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -143,7 +141,6 @@ const Queue: React.FC = () => {
         )}
       </div>
 
-      {/* Queue Grid */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Queue ({queue.length})</h2>
 
@@ -156,7 +153,6 @@ const Queue: React.FC = () => {
                 key={item.id}
                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
               >
-                {/* Thumbnail or Reels Logo */}
                 <div className="mb-3 w-1/2 aspect-video bg-gray-100 rounded overflow-hidden">
                   {isInstagramReels(item.video_url) ? (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600">
@@ -177,45 +173,38 @@ const Queue: React.FC = () => {
                   ) : null}
                 </div>
 
-                {/* Status Badge */}
                 <div className="mb-2">
                   {getStatusBadge(item.status)}
                 </div>
 
-                {/* Title */}
                 <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">
                   {item.title || 'Loading...'}
                 </h3>
 
-                {/* Channel Name */}
                 {item.channel_name && (
                   <p className="text-sm text-gray-600 mb-2">
                     📺 {item.channel_name}
                   </p>
                 )}
 
-                {/* Duration */}
                 {item.duration && (
                   <p className="text-sm text-gray-600 mb-2">
                     ⏱️ {formatDuration(item.duration)}
                   </p>
                 )}
 
-                {/* Error Message */}
                 {item.error_message && (
                   <p className="text-sm text-red-600 mt-2 p-2 bg-red-50 rounded">
                     {item.error_message}
                   </p>
                 )}
 
-                {/* File Path (for completed) */}
                 {item.status === 'completed' && item.file_path && (
                   <p className="text-xs text-gray-500 mt-2 truncate" title={item.file_path}>
                     📁 {item.file_path.split('/').pop()}
                   </p>
                 )}
 
-                {/* Timestamps */}
                 <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
                   <p>Added: {new Date(item.created_at).toLocaleString()}</p>
                   {item.completed_at && (
