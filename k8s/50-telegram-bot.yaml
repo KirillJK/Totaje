@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-bot
+  namespace: jktota
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-bot
+  template:
+    metadata:
+      labels:
+        app: telegram-bot
+    spec:
+      containers:
+      - name: telegram-bot
+        image: jktota-telegram-bot:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jktota-secrets
+              key: TELEGRAM_BOT_TOKEN
+        - name: YOUTUBE_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: jktota-config
+              key: YOUTUBE_SERVICE_URL
+        volumeMounts:
+        - name: downloads
+          mountPath: /app/downloads
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: downloads

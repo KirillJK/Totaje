@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: jktota
+
+resources:
+  - 00-namespace.yaml
+  - 01-configmap.yaml
+  - 02-secrets.yaml
+  - 03-persistent-volumes.yaml
+  - 04-postgres-init-scripts.yaml
+  - 10-postgres.yaml
+  - 20-youtube-service.yaml
+  - 30-server.yaml
+  - 40-client.yaml
+  - 50-telegram-bot.yaml
+
+# Common labels for all resources
+commonLabels:
+  app.kubernetes.io/name: jktota
+  app.kubernetes.io/version: "1.0.0"
+
+# Images (update these with your registry)
+images:
+  - name: jktota-server
+    newName: jktota-server
+    newTag: latest
+  - name: jktota-client
+    newName: jktota-client
+    newTag: latest
+  - name: jktota-youtube-service
+    newName: jktota-youtube-service
+    newTag: latest
+  - name: jktota-telegram-bot
+    newName: jktota-telegram-bot
+    newTag: latest

@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: jktota-prod
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+
+bases:
+  - ../../
+
+patches:
+  # Increase replicas for production
+  - target:
+      kind: Deployment
+      name: server
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Deployment
+      name: client
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Deployment
+      name: youtube-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  # Increase resources for production
+  - target:
+      kind: Deployment
+      name: server
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "512Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "500m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "1000m"
+
+configMapGenerator:
+  - name: jktota-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - SERVER_URL=https://api.jktota.example.com
+      - CLIENT_URL=https://jktota.example.com
+
+resources:
+  - ingress.yaml

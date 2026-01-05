@@ -125,35 +125,55 @@ class VideoDownloaderBot:
             return
 
         file_path = final_status.get('file_path')
-        if not file_path or not os.path.exists(file_path):
+        logger.info(f"File path from API: {file_path}")
+
+        if not file_path:
+            logger.error("No file path received from API")
             await status_message.edit_text("❌ Файл не найден на сервере")
             return
 
+        file_exists = os.path.exists(file_path)
+        logger.info(f"File exists check: {file_exists}")
+
+        if not file_exists:
+            logger.error(f"File not found at path: {file_path}")
+            logger.info(f"Contents of /app/downloads: {os.listdir('/app/downloads') if os.path.exists('/app/downloads') else 'Directory does not exist'}")
+            await status_message.edit_text("❌ Файл не найден на сервере")
+            return
+
+        logger.info(f"File size: {os.path.getsize(file_path)} bytes")
         await status_message.edit_text("📤 Отправляю файл...")
 
         try:
             is_audio = file_path.endswith('.mp3')
             title = final_status.get('title', 'Downloaded file')
 
+            logger.info(f"Sending {'audio' if is_audio else 'video'} file: {title}")
+
             if is_audio:
                 with open(file_path, 'rb') as audio_file:
                     await update.message.reply_audio(
                         audio=audio_file,
                         title=title,
-                        performer=final_status.get('channel_name', 'Unknown')
+                        performer=final_status.get('channel_name', 'Unknown'),
+                        read_timeout=120,
+                        write_timeout=120
                     )
             else:
                 with open(file_path, 'rb') as video_file:
                     await update.message.reply_video(
                         video=video_file,
-                        caption=title
+                        caption=title,
+                        read_timeout=120,
+                        write_timeout=120
                     )
 
+            logger.info("File sent successfully")
             await status_message.delete()
             await update.message.reply_text("✅ Готово!")
 
         except Exception as e:
-            logger.error(f"Error sending file: {e}")
+            logger.error(f"Error sending file: {e}", exc_info=True)
             await status_message.edit_text(f"❌ Ошибка при отправке файла: {str(e)}")
 
     def run(self):

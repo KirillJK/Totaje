@@ -5,7 +5,10 @@
   "scripts": {
     "dev:server": "nodemon --exec ts-node server/index.ts",
     "dev:client": "cd client && npm run dev",
+    "dev:telegram": "cd telegram-bot && python bot.py",
+    "dev:youtube": "cd youtube-service && python main.py",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:all": "concurrently -n \"server,client,telegram,youtube\" -c \"blue,green,yellow,magenta\" \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:telegram\" \"npm run dev:youtube\"",
     "build:server": "tsc",
     "build:client": "cd client && npm run build",
     "build": "npm run build:server && npm run build:client",

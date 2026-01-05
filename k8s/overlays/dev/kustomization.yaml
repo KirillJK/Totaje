@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: jktota-dev
+
+namePrefix: dev-
+
+commonLabels:
+  environment: dev
+
+bases:
+  - ../../
+
+patches:
+  # Reduce replicas for dev
+  - target:
+      kind: Deployment
+      name: server
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: client
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # Use NodePort for dev instead of LoadBalancer
+  - target:
+      kind: Service
+      name: client
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: NodePort
+
+  # Reduce resource requests for dev
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+
+configMapGenerator:
+  - name: jktota-config
+    behavior: merge
+    literals:
+      - NODE_ENV=development
+      - SERVER_URL=http://localhost:3000
+      - CLIENT_URL=http://localhost:8080

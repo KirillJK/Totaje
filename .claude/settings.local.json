@@ -13,7 +13,8 @@
       "Bash(timeout /t 3 /nobreak)",
       "Bash(cat:*)",
       "Bash(test:*)",
-      "Bash(copy .env.example .env)"
+      "Bash(copy .env.example .env)",
+      "Bash(mkdir:*)"
     ]
   }
 }
