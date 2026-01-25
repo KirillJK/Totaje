@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      max-parallel: 1   # последовательная сборка, чтобы OIDC не дропало jobs
+      max-parallel: 1
       matrix:
         service:
           - name: server
@@ -51,7 +51,7 @@ jobs:
             -f ${{ matrix.service.path }}/Dockerfile \
             -t $IMAGE:${{ matrix.service.name }}-${{ github.sha }} \
             -t $IMAGE:${{ matrix.service.name }}-latest \
-            ${{ matrix.service.path }}
+            .
 
           docker push $IMAGE:${{ matrix.service.name }}-${{ github.sha }}
           docker push $IMAGE:${{ matrix.service.name }}-latest
