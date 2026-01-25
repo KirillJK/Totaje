@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jktota-postgres
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jktota}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  youtube-service:
+    image: jktota-youtube-service
+    container_name: jktota-youtube-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jktota}:${POSTGRES_PASSWORD:-jktota123}@postgres:5432/${POSTGRES_DB:-jktota_db}
+      - DOWNLOAD_PATH=/videos
+      - PORT=8000
+    volumes:
+      - videos_data:/videos
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    image: jktota-server
+    container_name: jktota-server
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jktota}:${POSTGRES_PASSWORD:-jktota123}@postgres:5432/${POSTGRES_DB:-jktota_db}
+      - YOUTUBE_SERVICE_URL=http://youtube-service:8000
+      - CLIENT_URL=http://localhost
+      - SERVER_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      youtube-service:
+        condition: service_started
+
+  client:
+    image: jktota-client
+    container_name: jktota-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+  telegram-bot:
+    image: jktota-telegram-bot
+    container_name: jktota-telegram-bot
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      - YOUTUBE_SERVICE_URL=http://youtube-service:8000
+    volumes:
+      - videos_data:/videos
+    depends_on:
+      - youtube-service
+
+volumes:
+  postgres_data:
+  videos_data:

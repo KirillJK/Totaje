@@ -1,21 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create downloads directory
-RUN mkdir -p /app/downloads
+# Copy source code
+COPY bot.py .
 
-# Copy bot source code
-COPY . .
-
-# Run bot
+# Run the bot
 CMD ["python", "bot.py"]

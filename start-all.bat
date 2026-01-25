@@ -1,3 +1,0 @@
-@echo off
-echo Starting all services...
-npm run dev:all
